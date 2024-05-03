@@ -54,8 +54,7 @@ jobs:
         
       - name: Create Namespace if not exists
         run: |
-          kubectl get namespace aak-app || kubectl create namespace aak-app
-         #kubectl get namespace aak-app >/dev/null 2>&1 || kubectl create namespace aak-app
+          kubectl get namespace aak-app >/dev/null 2>&1 || kubectl create namespace aak-app
 
   
       # # Backend: Deploy image to Kubernetes as a (Deployment|StatefulSet|Job|CronJob|DaemonSet) + Networking (Service(ClusterIP|LoadBalancer)|Ingress|Service Mesh)

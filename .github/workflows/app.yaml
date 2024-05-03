@@ -50,7 +50,7 @@ jobs:
 
 
       - name: Login to EKS - update kubeconfig
-        run: aws eks --region us-east-1 update-kubeconfig --name project-x-eks-main --region $AWS_REGION
+        run: aws eks update-kubeconfig --name project-x-eks-main --region us-east-1
         
       - name: Create Namespace if not exists
         run: |

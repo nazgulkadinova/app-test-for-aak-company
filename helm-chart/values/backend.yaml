@@ -1,25 +1,3 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: node-web-app
-  labels:
-    app: node-web-app
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: node-web-app
-  template:
-    metadata:
-      labels:
-        app: node-web-app
-    spec:
-      containers:
-      - name: node-web-app
-        image: your-registry/node-web-app
-        ports:
-        - containerPort: 3000
-
 replicaCount: 2
 image:
   repo: "881493551084.dkr.ecr.us-east-1.amazonaws.com/aak-company" 

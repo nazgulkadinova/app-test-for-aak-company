@@ -64,7 +64,7 @@ jobs:
         run: |
           IMAGE_TAG=${{ github.sha }}
 
-      #     helm upgrade --install aak-app ./helm-chart \
-      #     --values ./helm-chart/values/backend/${ENVIRONMENT_STAGE}-values.yaml \
-      #     --namespace aak-app \
-      #     --set image.tag="$IMAGE_TAG"
+          helm upgrade --install aak-app ./helm-chart \
+          --values ./helm-chart/values/backend/${ENVIRONMENT_STAGE}-values.yaml \
+          --namespace aak-app \
+          --set image.tag="$IMAGE_TAG"

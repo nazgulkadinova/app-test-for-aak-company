@@ -57,12 +57,12 @@ jobs:
           kubectl get namespace aak-app >/dev/null 2>&1 || kubectl create namespace aak-app
 
   
-      # # Backend: Deploy image to Kubernetes as a (Deployment|StatefulSet|Job|CronJob|DaemonSet) + Networking (Service(ClusterIP|LoadBalancer)|Ingress|Service Mesh)
-      # - name: Backend - Deploy to Kubernetes
-      #   env:
-      #     SEMANTIC_TAG: "v1.0.2" # Manually set this
-      #   run: |
-      #     IMAGE_TAG=${{ github.sha }}
+      # Backend: Deploy image to Kubernetes as a (Deployment|StatefulSet|Job|CronJob|DaemonSet) + Networking (Service(ClusterIP|LoadBalancer)|Ingress|Service Mesh)
+      - name: Backend - Deploy to Kubernetes
+        env:
+          SEMANTIC_TAG: "v1.0.2" # Manually set this
+        run: |
+          IMAGE_TAG=${{ github.sha }}
 
       #     helm upgrade --install aak-app ./helm-chart \
       #     --values ./helm-chart/values/backend/${ENVIRONMENT_STAGE}-values.yaml \

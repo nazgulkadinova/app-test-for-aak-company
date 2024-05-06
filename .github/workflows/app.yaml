@@ -1,0 +1,70 @@
+name: "Workflow - Deploy a simple app for AAk Company"
+
+on:
+  push:
+    branches:
+      - feature/**
+      - main
+
+# required permissions by GitHub Actions for assuming AWS IAM role
+permissions:
+  id-token: write # This is required for requesting the JWT
+  contents: read # This is required for actions/checkout
+env:
+  AWS_REGION: "us-east-1"
+  # ENVIRONMENT_STAGE: ${{ (github.ref == 'refs/heads/main' && 'production') || (github.ref == 'refs/heads/staging' && 'staging') || 'dev' }}
+  ENVIRONMENT_STAGE: "dev"
+jobs:
+  deploy-platform-tools:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    environment: dev
+
+    steps:
+      - name: Checkout Branch
+        uses: actions/checkout@v3
+
+      # login to AWS
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.GitHubActionsCICDrole }}
+          role-session-name: GitHubActionsCICDrole
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+      - name: Backend - Build, tag, and push docker image to Amazon ECR
+        if: github.ref != 'refs/heads/main'
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: aak-company
+          IMAGE_TAG: ${{ github.sha }}
+        #working-directory: ./backend
+        run: |
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -f Dockerfile .
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+
+
+      - name: Login to EKS - update kubeconfig
+        run: aws eks update-kubeconfig --name project-x-eks-main --region us-east-1
+        
+      - name: Create Namespace if not exists
+        run: |
+          kubectl get namespace aak-app >/dev/null 2>&1 || kubectl create namespace aak-app
+
+  
+      # Backend: Deploy image to Kubernetes as a (Deployment|StatefulSet|Job|CronJob|DaemonSet) + Networking (Service(ClusterIP|LoadBalancer)|Ingress|Service Mesh)
+      - name: Backend - Deploy to Kubernetes
+        env:
+          SEMANTIC_TAG: "v1.0.2" # Manually set this
+        run: |
+          IMAGE_TAG=${{ github.sha }}
+
+          helm upgrade --install aak-app ./helm-chart \
+          --values ./helm-chart/values/backend.yaml \
+          --namespace aak-app \
+          --set image.tag="$IMAGE_TAG"
